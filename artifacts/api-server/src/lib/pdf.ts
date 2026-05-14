@@ -1,4 +1,6 @@
 import PDFDocument from "pdfkit";
+import path from "path";
+import fs from "fs";
 import type { InvoiceItem } from "@workspace/db";
 
 type InvoiceData = {
@@ -48,8 +50,15 @@ export function generateInvoicePdf(data: InvoiceData): Promise<Buffer> {
     const pageWidth = doc.page.width - 80;
 
     // ── Header ─────────────────────────────────────────────────────────────
-    doc.fontSize(20).font("Helvetica-Bold").text(data.shop.shopName, 40, 40, { align: "center", width: pageWidth });
-    doc.fontSize(10).font("Helvetica").text(data.shop.shopAddress, { align: "center", width: pageWidth });
+    const logoPath = path.join(process.cwd(), "logo.png");
+    if (fs.existsSync(logoPath)) {
+      doc.image(logoPath, 40, 30, { height: 52, align: "center" });
+      doc.y = 90;
+    } else {
+      doc.fontSize(20).font("Helvetica-Bold").text(data.shop.shopName, 40, 40, { align: "center", width: pageWidth });
+      doc.moveDown(0.3);
+    }
+    doc.fontSize(10).font("Helvetica").text(data.shop.shopAddress, 40, doc.y, { align: "center", width: pageWidth });
     doc.fontSize(9).text(`GSTIN: ${data.shop.gstNumber}  |  UPI: ${data.shop.upiId}`, { align: "center", width: pageWidth });
     if (data.shop.phone) doc.text(`Phone: ${data.shop.phone}`, { align: "center", width: pageWidth });
 

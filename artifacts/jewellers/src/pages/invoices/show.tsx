@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { formatIndianCurrency, formatDate } from "@/lib/format";
-import { ArrowLeft, Download, Building2 } from "lucide-react";
+import { ArrowLeft, Download } from "lucide-react";
 
 export default function InvoiceShow() {
   const { id } = useParams<{ id: string }>();
@@ -72,15 +72,10 @@ export default function InvoiceShow() {
         {/* Invoice Body */}
         <div className="bg-card border rounded-lg overflow-hidden">
           {/* Top bar */}
-          <div className="bg-primary/5 border-b px-6 py-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="bg-primary/5 border-b px-6 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <div className="bg-primary/10 p-2 rounded-lg text-primary">
-                <Building2 className="h-6 w-6" />
-              </div>
-              <div>
-                <p className="font-bold text-lg leading-tight">S.S. JEWELLERS</p>
-                <p className="text-xs text-muted-foreground">Tax Invoice</p>
-              </div>
+              <img src="/logo-brand.png" alt="S.S. Jewellers" className="h-14 w-auto" />
+              <p className="text-xs text-muted-foreground">Tax Invoice</p>
             </div>
             <Badge variant="outline" className="font-mono text-sm px-3 py-1">{invoice.invoiceNumber}</Badge>
           </div>

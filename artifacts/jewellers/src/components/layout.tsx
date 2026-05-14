@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { Link, useLocation } from "wouter";
 import { useClerk, useUser } from "@clerk/react";
-import { FileText, LayoutDashboard, Settings, LogOut, Receipt, PlusCircle, Building2 } from "lucide-react";
+import { LayoutDashboard, Settings, LogOut, Receipt, PlusCircle } from "lucide-react";
 import { Button } from "./ui/button";
 
 export default function Layout({ children }: { children: ReactNode }) {
@@ -25,14 +25,9 @@ export default function Layout({ children }: { children: ReactNode }) {
     <div className="flex h-screen bg-background">
       {/* Sidebar */}
       <aside className="w-64 border-r bg-card flex flex-col hidden md:flex">
-        <div className="p-6 border-b flex items-center gap-3">
-          <div className="bg-primary/10 p-2 rounded-lg text-primary">
-            <Building2 className="h-6 w-6" />
-          </div>
-          <div>
-            <h1 className="font-bold text-lg leading-tight text-foreground">S.S. Jewellers</h1>
-            <p className="text-xs text-muted-foreground">Invoicing System</p>
-          </div>
+        <div className="px-5 py-4 border-b flex items-center gap-2">
+          <img src="/logo-brand.png" alt="S.S. Jewellers" className="h-10 w-auto" />
+          <p className="text-xs text-muted-foreground leading-tight">Invoicing System</p>
         </div>
 
         <nav className="flex-1 p-4 space-y-1">
@@ -74,12 +69,8 @@ export default function Layout({ children }: { children: ReactNode }) {
 
       {/* Main Content */}
       <main className="flex-1 overflow-auto">
-        <div className="md:hidden p-4 border-b bg-card flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Building2 className="h-5 w-5 text-primary" />
-            <h1 className="font-bold">S.S. Jewellers</h1>
-          </div>
-          {/* Mobile menu could go here */}
+        <div className="md:hidden p-3 border-b bg-card flex items-center justify-between">
+          <img src="/logo-brand.png" alt="S.S. Jewellers" className="h-8 w-auto" />
         </div>
         <div className="p-4 md:p-8 max-w-6xl mx-auto">
           {children}

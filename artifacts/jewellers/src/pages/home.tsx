@@ -1,22 +1,19 @@
 import { Link } from "wouter";
-import { Building2, FileText, BarChart3, Download } from "lucide-react";
+import { FileText, BarChart3, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function Home() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <header className="border-b bg-card px-6 py-4 flex items-center gap-3">
-        <div className="bg-primary/10 p-1.5 rounded-md text-primary">
-          <Building2 className="h-5 w-5" />
-        </div>
-        <span className="font-bold text-lg">S.S. Jewellers</span>
+      <header className="border-b bg-card px-6 py-4 flex items-center gap-2">
+        <img src="/logo-brand.png" alt="S.S. Jewellers" className="h-8 w-auto" />
       </header>
 
       <main className="flex-1 flex items-center justify-center px-4">
         <div className="max-w-lg w-full text-center space-y-8">
           <div className="space-y-4">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 text-primary mx-auto">
-              <Building2 className="h-8 w-8" />
+            <div className="mx-auto flex items-center justify-center">
+              <img src="/logo-brand.png" alt="S.S. Jewellers" className="h-28 w-auto" />
             </div>
             <h1 className="text-3xl font-bold text-foreground">S.S. Jewellers Invoicing</h1>
             <p className="text-muted-foreground text-lg">
