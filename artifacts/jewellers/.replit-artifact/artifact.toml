@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "S.S. Jewellers Invoicing"
+version = "1.0.0"
+id = "artifacts/jewellers"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 24323
+
+[services.development]
+run = "pnpm --filter @workspace/jewellers run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/jewellers", "run", "build" ]
+publicDir = "artifacts/jewellers/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "24323"
+BASE_PATH = "/"

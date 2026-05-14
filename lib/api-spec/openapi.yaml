@@ -3,20 +3,26 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: S.S. Jewellers Invoicing API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: profile
+    description: Shop profile operations
+  - name: invoices
+    description: Invoice operations
+  - name: dashboard
+    description: Dashboard statistics
+
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,13 +30,402 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /profile:
+    get:
+      operationId: getProfile
+      tags: [profile]
+      summary: Get the current user's shop profile
+      responses:
+        "200":
+          description: Profile found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Profile"
+        "404":
+          description: Profile not found
+    put:
+      operationId: upsertProfile
+      tags: [profile]
+      summary: Create or update the current user's shop profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProfileInput"
+      responses:
+        "200":
+          description: Profile saved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Profile"
+
+  /invoices:
+    get:
+      operationId: listInvoices
+      tags: [invoices]
+      summary: List all invoices for current user
+      responses:
+        "200":
+          description: Invoice list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/InvoiceSummary"
+    post:
+      operationId: createInvoice
+      tags: [invoices]
+      summary: Create a new invoice
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InvoiceInput"
+      responses:
+        "201":
+          description: Invoice created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Invoice"
+
+  /invoices/{id}:
+    get:
+      operationId: getInvoice
+      tags: [invoices]
+      summary: Get a single invoice with all items
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Invoice found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Invoice"
+        "404":
+          description: Not found
+    delete:
+      operationId: deleteInvoice
+      tags: [invoices]
+      summary: Delete an invoice
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /invoices/{id}/pdf:
+    get:
+      operationId: downloadInvoicePdf
+      tags: [invoices]
+      summary: Generate and download invoice as PDF
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: PDF file
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: Not found
+
+  /dashboard/stats:
+    get:
+      operationId: getDashboardStats
+      tags: [dashboard]
+      summary: Get aggregated dashboard statistics
+      responses:
+        "200":
+          description: Dashboard stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardStats"
+
+  /dashboard/monthly-gst:
+    get:
+      operationId: getMonthlyGst
+      tags: [dashboard]
+      summary: Get monthly GST breakdown for the current year
+      responses:
+        "200":
+          description: Monthly GST data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MonthlyGst"
+
+  /dashboard/recent-invoices:
+    get:
+      operationId: getRecentInvoices
+      tags: [dashboard]
+      summary: Get 5 most recent invoices
+      responses:
+        "200":
+          description: Recent invoices
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/InvoiceSummary"
+
 components:
   schemas:
     HealthStatus:
       type: object
+      required: [status]
       properties:
         status:
           type: string
-      required:
-        - status
 
+    Profile:
+      type: object
+      required: [id, userId, shopName, shopAddress, gstNumber, upiId, state, createdAt]
+      properties:
+        id:
+          type: integer
+        userId:
+          type: string
+        shopName:
+          type: string
+        shopAddress:
+          type: string
+        gstNumber:
+          type: string
+        upiId:
+          type: string
+        state:
+          type: string
+        phone:
+          type: ["string", "null"]
+        email:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+          format: date-time
+
+    ProfileInput:
+      type: object
+      required: [shopName, shopAddress, gstNumber, upiId, state]
+      properties:
+        shopName:
+          type: string
+          minLength: 1
+        shopAddress:
+          type: string
+          minLength: 1
+        gstNumber:
+          type: string
+          minLength: 1
+        upiId:
+          type: string
+          minLength: 1
+        state:
+          type: string
+          minLength: 1
+        phone:
+          type: string
+        email:
+          type: string
+
+    InvoiceItem:
+      type: object
+      required: [id, invoiceId, description, amount, makingChargePercent, makingChargeAmount, gstJewel, gstMaking, itemTotal]
+      properties:
+        id:
+          type: integer
+        invoiceId:
+          type: integer
+        itemType:
+          type: ["string", "null"]
+        description:
+          type: string
+        grossWeight:
+          type: ["number", "null"]
+        netWeight:
+          type: ["number", "null"]
+        sellingPricePerGram:
+          type: ["number", "null"]
+        gemstonePrice:
+          type: ["number", "null"]
+        amount:
+          type: number
+        makingChargePercent:
+          type: number
+        makingChargeAmount:
+          type: number
+        gstJewel:
+          type: number
+        gstMaking:
+          type: number
+        itemTotal:
+          type: number
+        hsnCode:
+          type: ["string", "null"]
+
+    InvoiceItemInput:
+      type: object
+      required: [description, amount, makingChargePercent, makingChargeAmount, gstJewel, gstMaking, itemTotal]
+      properties:
+        itemType:
+          type: string
+        description:
+          type: string
+          minLength: 1
+        grossWeight:
+          type: number
+        netWeight:
+          type: number
+        sellingPricePerGram:
+          type: number
+        gemstonePrice:
+          type: number
+        amount:
+          type: number
+        makingChargePercent:
+          type: number
+        makingChargeAmount:
+          type: number
+        gstJewel:
+          type: number
+        gstMaking:
+          type: number
+        itemTotal:
+          type: number
+        hsnCode:
+          type: string
+
+    InvoiceSummary:
+      type: object
+      required: [id, invoiceNumber, customerName, invoiceDate, totalAmount, createdAt]
+      properties:
+        id:
+          type: integer
+        invoiceNumber:
+          type: string
+        customerName:
+          type: string
+        customerAddress:
+          type: ["string", "null"]
+        customerGstin:
+          type: ["string", "null"]
+        invoiceDate:
+          type: string
+        totalAmount:
+          type: number
+        createdAt:
+          type: string
+          format: date-time
+
+    Invoice:
+      type: object
+      required: [id, invoiceNumber, customerName, invoiceDate, totalAmount, createdAt, items]
+      properties:
+        id:
+          type: integer
+        invoiceNumber:
+          type: string
+        customerName:
+          type: string
+        customerAddress:
+          type: ["string", "null"]
+        customerGstin:
+          type: ["string", "null"]
+        invoiceDate:
+          type: string
+        subtotalAmount:
+          type: number
+        makingChargesTotal:
+          type: number
+        gstJewelTotal:
+          type: number
+        gstMakingTotal:
+          type: number
+        totalAmount:
+          type: number
+        createdAt:
+          type: string
+          format: date-time
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/InvoiceItem"
+
+    InvoiceInput:
+      type: object
+      required: [customerName, invoiceDate, items]
+      properties:
+        customerName:
+          type: string
+          minLength: 1
+        customerAddress:
+          type: string
+        customerGstin:
+          type: string
+        invoiceDate:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/InvoiceItemInput"
+
+    DashboardStats:
+      type: object
+      required: [totalInvoices, totalSales, totalGstCollected, totalMakingCharges, thisMonthInvoices, thisMonthSales]
+      properties:
+        totalInvoices:
+          type: integer
+        totalSales:
+          type: number
+        totalGstCollected:
+          type: number
+        totalMakingCharges:
+          type: number
+        thisMonthInvoices:
+          type: integer
+        thisMonthSales:
+          type: number
+
+    MonthlyGst:
+      type: object
+      required: [month, year, gstJewel, gstMaking, totalGst, invoiceCount]
+      properties:
+        month:
+          type: integer
+        year:
+          type: integer
+        monthName:
+          type: string
+        gstJewel:
+          type: number
+        gstMaking:
+          type: number
+        totalGst:
+          type: number
+        invoiceCount:
+          type: integer
