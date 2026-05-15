@@ -2,6 +2,8 @@ import { pool } from "@workspace/db";
 import { logger } from "./logger";
 
 export async function runMigrations(): Promise<void> {
+  const dbUrl = process.env.DATABASE_URL ?? "";
+  logger.info({ dbHost: dbUrl.replace(/:[^:@]+@/, ":***@").split("@")[1] ?? "unknown" }, "Connecting to database");
   const client = await pool.connect();
   try {
     await client.query(`
