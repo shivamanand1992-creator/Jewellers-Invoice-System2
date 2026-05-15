@@ -16,7 +16,7 @@ export const invoicesTable = pgTable("invoices", {
   gstMakingTotal: numeric("gst_making_total", { precision: 12, scale: 2 }).notNull().default("0"),
   totalAmount: numeric("total_amount", { precision: 12, scale: 2 }).notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 export const invoiceItemsTable = pgTable("invoice_items", {

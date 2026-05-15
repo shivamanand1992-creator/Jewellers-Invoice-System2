@@ -42,7 +42,7 @@ router.put("/profile", requireAuth(), async (req, res): Promise<void> => {
   if (existing.length > 0) {
     [profile] = await db
       .update(profilesTable)
-      .set({ ...parsed.data, userId })
+      .set({ ...parsed.data, userId, updatedAt: new Date() })
       .where(eq(profilesTable.userId, userId))
       .returning();
   } else {
