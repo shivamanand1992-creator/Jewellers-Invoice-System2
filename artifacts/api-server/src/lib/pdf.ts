@@ -110,14 +110,16 @@ export function generateInvoicePdf(data: InvoiceData): Promise<Buffer> {
 
     // Left: invoice meta
     doc.font("Helvetica-Bold").fontSize(8.5).fillColor("#000000")
-       .text("Invoice No:", L, y, { continued: true, width: 75 })
-       .font("Helvetica").text(`  ${data.invoiceNumber}`, { width: leftColW - 75 });
-    y += 14;
+       .text("Invoice No:", L, y, { width: 70, lineBreak: false });
+    doc.font("Helvetica").fontSize(8.5)
+       .text(data.invoiceNumber, L + 72, y, { width: leftColW - 72, lineBreak: false });
+    y += 15;
 
-    doc.font("Helvetica-Bold").fontSize(8.5)
-       .text("Date:", L, y, { continued: true, width: 75 })
-       .font("Helvetica").text(`  ${data.invoiceDate}`, { width: leftColW - 75 });
-    y += 14;
+    doc.font("Helvetica-Bold").fontSize(8.5).fillColor("#000000")
+       .text("Date:", L, y, { width: 70, lineBreak: false });
+    doc.font("Helvetica").fontSize(8.5)
+       .text(data.invoiceDate, L + 72, y, { width: leftColW - 72, lineBreak: false });
+    y += 15;
 
     // Right: Bill To
     let ry = infoStartY;
@@ -277,43 +279,6 @@ export function generateInvoicePdf(data: InvoiceData): Promise<Buffer> {
 
     hline(doc, y, "#333333", 0.8);
     y += 12;
-
-    // ═══════════════════════════════════════════════
-    // TERMS + AUTHORIZED SIGNATORY
-    // ═══════════════════════════════════════════════
-    const termsY = y;
-    const sigX = L + W / 2 + 20;
-    const sigW = W / 2 - 20;
-
-    // Terms
-    doc.font("Helvetica-Bold").fontSize(8).fillColor("#000000")
-       .text("Terms & Conditions:", L, termsY, { width: W / 2 - 10 });
-
-    const terms = [
-      "1. Goods once sold will not be taken back.",
-      "2. All disputes subject to Delhi jurisdiction.",
-      "3. This is a computer-generated invoice.",
-      "4. Prices inclusive of GST as itemized above.",
-      "5. Please check goods at time of purchase.",
-    ];
-
-    doc.font("Helvetica").fontSize(7.5).fillColor("#444444");
-    let tty = termsY + 13;
-    for (const t of terms) {
-      doc.text(t, L, tty, { width: W / 2 - 10, lineBreak: false });
-      tty += 11;
-    }
-
-    // Signature block
-    doc.font("Helvetica").fontSize(8).fillColor("#444444")
-       .text(`For ${data.shop.shopName}`, sigX, termsY, { width: sigW });
-
-    const sigLineY = termsY + 45;
-    doc.moveTo(sigX, sigLineY).lineTo(sigX + 140, sigLineY)
-       .strokeColor("#000000").lineWidth(0.5).stroke();
-
-    doc.font("Helvetica-Bold").fontSize(8).fillColor("#000000")
-       .text("Authorized Signatory", sigX, sigLineY + 5, { width: sigW });
 
     doc.end();
   });
