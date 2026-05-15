@@ -125,11 +125,16 @@ globalThis.__dirname = __bannerPath.dirname(globalThis.__filename);
 }
 
 async function copyFonts() {
-  const src = new URL("../../node_modules/pdfkit/js/data", import.meta.url).pathname;
+  // Find pdfkit data directory - works with both flat and pnpm nested node_modules
+  const { createRequire } = await import("node:module");
+  const require = createRequire(import.meta.url);
+  const pdfkitPath = require.resolve("pdfkit/package.json");
+  const pdfkitDir = pdfkitPath.replace("/package.json", "");
+  const src = pdfkitDir + "/js/data";
   const dest = new URL("dist/data", import.meta.url).pathname;
   await mkdir(dest, { recursive: true });
   await cp(src, dest, { recursive: true });
-  console.log("Copied PDFKit font data to dist/data");
+  console.log("Copied PDFKit font data from", src, "to dist/data");
 }
 
 buildAll().then(() => copyFonts()).catch((err) => {
