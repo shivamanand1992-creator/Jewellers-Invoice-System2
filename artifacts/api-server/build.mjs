@@ -137,7 +137,21 @@ async function copyFonts() {
   console.log("Copied PDFKit font data from", src, "to dist/data");
 }
 
-buildAll().then(() => copyFonts()).then(() => copyAssets()).catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+async function copyAssets() {
+  const { copyFile, mkdir } = await import("node:fs/promises");
+  const { existsSync } = await import("node:fs");
+  const src = new URL("qr-code.jpg", import.meta.url).pathname;
+  const dest = new URL("dist/qr-code.jpg", import.meta.url).pathname;
+  if (existsSync(src)) {
+    await copyFile(src, dest);
+    console.log("Copied QR code to dist/");
+  }
+}
+
+buildAll()
+  .then(() => copyFonts())
+  .then(() => copyAssets())
+  .catch((err) => {
+    console.error(err);
+    process.exit(1);
+  });
