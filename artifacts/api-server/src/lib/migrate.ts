@@ -1,11 +1,18 @@
-import { pool } from "@workspace/db";
+import pg from "pg";
 import { logger } from "./logger";
 
 export async function runMigrations(): Promise<void> {
   const dbUrl = process.env.DATABASE_URL ?? "";
-  logger.info({ dbHost: dbUrl.replace(/:[^:@]+@/, ":***@").split("@")[1] ?? "unknown" }, "Connecting to database");
-  const client = await pool.connect();
+  const maskedUrl = dbUrl.replace(/(:)([^:@]+)(@)/, (_m, c, p, a) => `${c}${p.slice(0, 4)}...${a}`);
+  logger.info({ maskedUrl }, "Running migrations");
+
+  const client = new pg.Client({
+    connectionString: dbUrl,
+    ssl: { rejectUnauthorized: false },
+  });
+
   try {
+    await client.connect();
     await client.query(`
       CREATE TABLE IF NOT EXISTS profiles (
         id SERIAL PRIMARY KEY,
@@ -58,10 +65,7 @@ export async function runMigrations(): Promise<void> {
       );
     `);
     logger.info("Database migrations completed");
-  } catch (err) {
-    logger.error({ err }, "Database migration failed");
-    throw err;
   } finally {
-    client.release();
+    await client.end();
   }
 }
