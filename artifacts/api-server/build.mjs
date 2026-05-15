@@ -137,7 +137,7 @@ async function copyFonts() {
   console.log("Copied PDFKit font data from", src, "to dist/data");
 }
 
-buildAll().then(() => copyFonts()).catch((err) => {
+buildAll().then(() => copyFonts()).then(() => copyAssets()).catch((err) => {
   console.error(err);
   process.exit(1);
 });
