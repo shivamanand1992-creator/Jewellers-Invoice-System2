@@ -57,7 +57,7 @@ if (process.env.NODE_ENV === "production") {
   const frontendDist = path.join(process.cwd(), "artifacts/jewellers/dist/public");
   if (fs.existsSync(frontendDist)) {
     app.use(express.static(frontendDist));
-    app.get("*", (_req, res) => {
+    app.get(/(.*)/, (_req, res) => {
       res.sendFile(path.join(frontendDist, "index.html"));
     });
   }
