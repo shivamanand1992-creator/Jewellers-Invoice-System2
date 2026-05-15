@@ -20,7 +20,7 @@ export default function InvoiceShow() {
     enabled: !isNaN(invoiceId),
   });
 
-  const handleDownloadPdf = () => {
+  const handleDownloadPdf = async () => {
     const token = getToken();
     const res = await fetch(`/api/invoices/${invoiceId}/pdf`, {
       headers: { Authorization: `Bearer ${token}` },
