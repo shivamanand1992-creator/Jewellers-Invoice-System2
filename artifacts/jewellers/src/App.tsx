@@ -9,10 +9,11 @@ import InvoicesList from "@/pages/invoices/list";
 import InvoiceNew from "@/pages/invoices/new";
 import InvoiceShow from "@/pages/invoices/show";
 import Profile from "@/pages/profile";
-import { ClerkProvider, SignIn, SignUp, Show, useClerk } from '@clerk/react';
+import { ClerkProvider, SignIn, SignUp, Show, useClerk, useAuth } from '@clerk/react';
 
 import { shadcn } from '@clerk/themes';
 import { useEffect, useRef } from "react";
+import { setAuthTokenGetter } from '@workspace/api-client-react';
 
 const queryClient = new QueryClient();
 
@@ -95,6 +96,15 @@ function SignUpPage() {
   );
 }
 
+function ClerkTokenWirer() {
+  const { getToken } = useAuth();
+  useEffect(() => {
+    setAuthTokenGetter(() => getToken());
+    return () => setAuthTokenGetter(null);
+  }, [getToken]);
+  return null;
+}
+
 function ClerkQueryClientCacheInvalidator() {
   const { addListener } = useClerk();
   const queryClient = useQueryClient();
@@ -144,6 +154,7 @@ function ClerkProviderWithRoutes() {
       routerReplace={(to) => setLocation(stripBase(to), { replace: true })}
     >
       <QueryClientProvider client={queryClient}>
+        <ClerkTokenWirer />
         <ClerkQueryClientCacheInvalidator />
         <Switch>
           <Route path="/" component={HomeRedirect} />
