@@ -50,7 +50,7 @@ export function generateInvoicePdf(data: InvoiceData): Promise<Buffer> {
     const pageWidth = doc.page.width - 80;
 
     // ── Header ─────────────────────────────────────────────────────────────
-    const logoPath = path.join(process.cwd(), "logo.png");
+    const logoPath = path.join(__dirname, "../logo.png");
     if (fs.existsSync(logoPath)) {
       doc.image(logoPath, 40, 30, { height: 52, align: "center" });
       doc.y = 90;

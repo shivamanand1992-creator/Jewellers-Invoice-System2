@@ -1,0 +1,6 @@
+[build]
+buildCommand = "BASE_PATH=/ pnpm --filter @workspace/jewellers run build && pnpm --filter @workspace/api-server run build"
+
+[deploy]
+startCommand = "node --enable-source-maps ./artifacts/api-server/dist/index.mjs"
+restartPolicyType = "ON_FAILURE"
