@@ -20,7 +20,7 @@ export const HealthCheckResponse = zod.object({
  * @summary Get the current user's shop profile
  */
 export const GetProfileResponse = zod.object({
-  "id": zod.number(),
+  "id": zod.coerce.number(),
   "userId": zod.string(),
   "shopName": zod.string(),
   "shopAddress": zod.string(),
@@ -54,7 +54,7 @@ export const UpsertProfileBody = zod.object({
 })
 
 export const UpsertProfileResponse = zod.object({
-  "id": zod.number(),
+  "id": zod.coerce.number(),
   "userId": zod.string(),
   "shopName": zod.string(),
   "shopAddress": zod.string(),
@@ -71,13 +71,13 @@ export const UpsertProfileResponse = zod.object({
  * @summary List all invoices for current user
  */
 export const ListInvoicesResponseItem = zod.object({
-  "id": zod.number(),
+  "id": zod.coerce.number(),
   "invoiceNumber": zod.string(),
   "customerName": zod.string(),
   "customerAddress": zod.string().nullish(),
   "customerGstin": zod.string().nullish(),
   "invoiceDate": zod.string(),
-  "totalAmount": zod.number(),
+  "totalAmount": zod.coerce.number(),
   "createdAt": zod.coerce.date()
 })
 export const ListInvoicesResponse = zod.array(ListInvoicesResponseItem)
@@ -98,16 +98,16 @@ export const CreateInvoiceBody = zod.object({
   "items": zod.array(zod.object({
   "itemType": zod.string().optional(),
   "description": zod.string().min(1),
-  "grossWeight": zod.number().optional(),
-  "netWeight": zod.number().optional(),
-  "sellingPricePerGram": zod.number().optional(),
-  "gemstonePrice": zod.number().optional(),
-  "amount": zod.number(),
-  "makingChargePercent": zod.number(),
-  "makingChargeAmount": zod.number(),
-  "gstJewel": zod.number(),
-  "gstMaking": zod.number(),
-  "itemTotal": zod.number(),
+  "grossWeight": zod.coerce.number().optional(),
+  "netWeight": zod.coerce.number().optional(),
+  "sellingPricePerGram": zod.coerce.number().optional(),
+  "gemstonePrice": zod.coerce.number().optional(),
+  "amount": zod.coerce.number(),
+  "makingChargePercent": zod.coerce.number(),
+  "makingChargeAmount": zod.coerce.number(),
+  "gstJewel": zod.coerce.number(),
+  "gstMaking": zod.coerce.number(),
+  "itemTotal": zod.coerce.number(),
   "hsnCode": zod.string().optional()
 }))
 })
@@ -121,33 +121,33 @@ export const GetInvoiceParams = zod.object({
 })
 
 export const GetInvoiceResponse = zod.object({
-  "id": zod.number(),
+  "id": zod.coerce.number(),
   "invoiceNumber": zod.string(),
   "customerName": zod.string(),
   "customerAddress": zod.string().nullish(),
   "customerGstin": zod.string().nullish(),
   "invoiceDate": zod.string(),
-  "subtotalAmount": zod.number().optional(),
-  "makingChargesTotal": zod.number().optional(),
-  "gstJewelTotal": zod.number().optional(),
-  "gstMakingTotal": zod.number().optional(),
-  "totalAmount": zod.number(),
+  "subtotalAmount": zod.coerce.number().optional(),
+  "makingChargesTotal": zod.coerce.number().optional(),
+  "gstJewelTotal": zod.coerce.number().optional(),
+  "gstMakingTotal": zod.coerce.number().optional(),
+  "totalAmount": zod.coerce.number(),
   "createdAt": zod.coerce.date(),
   "items": zod.array(zod.object({
-  "id": zod.number(),
-  "invoiceId": zod.number(),
+  "id": zod.coerce.number(),
+  "invoiceId": zod.coerce.number(),
   "itemType": zod.string().nullish(),
   "description": zod.string(),
-  "grossWeight": zod.number().nullish(),
-  "netWeight": zod.number().nullish(),
-  "sellingPricePerGram": zod.number().nullish(),
-  "gemstonePrice": zod.number().nullish(),
-  "amount": zod.number(),
-  "makingChargePercent": zod.number(),
-  "makingChargeAmount": zod.number(),
-  "gstJewel": zod.number(),
-  "gstMaking": zod.number(),
-  "itemTotal": zod.number(),
+  "grossWeight": zod.coerce.number().nullish(),
+  "netWeight": zod.coerce.number().nullish(),
+  "sellingPricePerGram": zod.coerce.number().nullish(),
+  "gemstonePrice": zod.coerce.number().nullish(),
+  "amount": zod.coerce.number(),
+  "makingChargePercent": zod.coerce.number(),
+  "makingChargeAmount": zod.coerce.number(),
+  "gstJewel": zod.coerce.number(),
+  "gstMaking": zod.coerce.number(),
+  "itemTotal": zod.coerce.number(),
   "hsnCode": zod.string().nullish()
 }))
 })
@@ -173,12 +173,12 @@ export const DownloadInvoicePdfParams = zod.object({
  * @summary Get aggregated dashboard statistics
  */
 export const GetDashboardStatsResponse = zod.object({
-  "totalInvoices": zod.number(),
-  "totalSales": zod.number(),
-  "totalGstCollected": zod.number(),
-  "totalMakingCharges": zod.number(),
-  "thisMonthInvoices": zod.number(),
-  "thisMonthSales": zod.number()
+  "totalInvoices": zod.coerce.number(),
+  "totalSales": zod.coerce.number(),
+  "totalGstCollected": zod.coerce.number(),
+  "totalMakingCharges": zod.coerce.number(),
+  "thisMonthInvoices": zod.coerce.number(),
+  "thisMonthSales": zod.coerce.number()
 })
 
 
@@ -186,13 +186,13 @@ export const GetDashboardStatsResponse = zod.object({
  * @summary Get monthly GST breakdown for the current year
  */
 export const GetMonthlyGstResponseItem = zod.object({
-  "month": zod.number(),
-  "year": zod.number(),
+  "month": zod.coerce.number(),
+  "year": zod.coerce.number(),
   "monthName": zod.string().optional(),
-  "gstJewel": zod.number(),
-  "gstMaking": zod.number(),
-  "totalGst": zod.number(),
-  "invoiceCount": zod.number()
+  "gstJewel": zod.coerce.number(),
+  "gstMaking": zod.coerce.number(),
+  "totalGst": zod.coerce.number(),
+  "invoiceCount": zod.coerce.number()
 })
 export const GetMonthlyGstResponse = zod.array(GetMonthlyGstResponseItem)
 
@@ -201,13 +201,13 @@ export const GetMonthlyGstResponse = zod.array(GetMonthlyGstResponseItem)
  * @summary Get 5 most recent invoices
  */
 export const GetRecentInvoicesResponseItem = zod.object({
-  "id": zod.number(),
+  "id": zod.coerce.number(),
   "invoiceNumber": zod.string(),
   "customerName": zod.string(),
   "customerAddress": zod.string().nullish(),
   "customerGstin": zod.string().nullish(),
   "invoiceDate": zod.string(),
-  "totalAmount": zod.number(),
+  "totalAmount": zod.coerce.number(),
   "createdAt": zod.coerce.date()
 })
 export const GetRecentInvoicesResponse = zod.array(GetRecentInvoicesResponseItem)
