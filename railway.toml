@@ -1,6 +1,6 @@
 [build]
 installCommand = "pnpm install --no-frozen-lockfile"
-buildCommand = "BASE_PATH=/ pnpm --filter @workspace/jewellers run build && pnpm --filter @workspace/api-server run build"
+buildCommand = "BASE_PATH=/ssj pnpm --filter @workspace/jewellers run build && pnpm --filter @workspace/api-server run build"
 
 [deploy]
 startCommand = "NODE_ENV=production node --enable-source-maps ./artifacts/api-server/dist/index.mjs"
