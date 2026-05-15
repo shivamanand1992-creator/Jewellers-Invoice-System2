@@ -13,6 +13,8 @@ export async function runMigrations(): Promise<void> {
 
   try {
     await client.connect();
+    logger.info("Connected to database, creating tables...");
+
     await client.query(`
       CREATE TABLE IF NOT EXISTS profiles (
         id SERIAL PRIMARY KEY,
@@ -27,7 +29,10 @@ export async function runMigrations(): Promise<void> {
         created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
         updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
       );
+    `);
+    logger.info("profiles table ready");
 
+    await client.query(`
       CREATE TABLE IF NOT EXISTS invoices (
         id SERIAL PRIMARY KEY,
         user_id TEXT NOT NULL,
@@ -44,7 +49,10 @@ export async function runMigrations(): Promise<void> {
         created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
         updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
       );
+    `);
+    logger.info("invoices table ready");
 
+    await client.query(`
       CREATE TABLE IF NOT EXISTS invoice_items (
         id SERIAL PRIMARY KEY,
         invoice_id INTEGER NOT NULL REFERENCES invoices(id) ON DELETE CASCADE,
@@ -64,7 +72,12 @@ export async function runMigrations(): Promise<void> {
         created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
       );
     `);
-    logger.info("Database migrations completed");
+    logger.info("invoice_items table ready");
+
+    logger.info("All migrations completed successfully");
+  } catch (err) {
+    logger.error({ err }, "Migration failed");
+    throw err;
   } finally {
     await client.end();
   }
