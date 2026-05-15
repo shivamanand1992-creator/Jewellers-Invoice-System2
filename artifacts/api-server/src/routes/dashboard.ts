@@ -11,7 +11,7 @@ import {
 const router: IRouter = Router();
 
 router.get("/dashboard/stats", requireAuth(), async (req, res): Promise<void> => {
-  const userId = req.auth.userId;
+  const userId = req.userId!;
 
   const allInvoices = await db
     .select()
@@ -57,7 +57,7 @@ router.get("/dashboard/stats", requireAuth(), async (req, res): Promise<void> =>
 });
 
 router.get("/dashboard/monthly-gst", requireAuth(), async (req, res): Promise<void> => {
-  const userId = req.auth.userId;
+  const userId = req.userId!;
 
   const invoices = await db
     .select()
@@ -97,7 +97,7 @@ router.get("/dashboard/monthly-gst", requireAuth(), async (req, res): Promise<vo
 });
 
 router.get("/dashboard/recent-invoices", requireAuth(), async (req, res): Promise<void> => {
-  const userId = req.auth.userId;
+  const userId = req.userId!;
 
   const invoices = await db
     .select()

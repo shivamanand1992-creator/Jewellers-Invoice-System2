@@ -15,7 +15,7 @@ import { generateInvoicePdf } from "../lib/pdf";
 const router: IRouter = Router();
 
 router.get("/invoices", requireAuth(), async (req, res): Promise<void> => {
-  const userId = req.auth.userId;
+  const userId = req.userId!;
   const invoices = await db
     .select()
     .from(invoicesTable)
@@ -26,7 +26,7 @@ router.get("/invoices", requireAuth(), async (req, res): Promise<void> => {
 });
 
 router.post("/invoices", requireAuth(), async (req, res): Promise<void> => {
-  const userId = req.auth.userId;
+  const userId = req.userId!;
   const parsed = CreateInvoiceBody.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: parsed.error.message });
@@ -101,7 +101,7 @@ router.post("/invoices", requireAuth(), async (req, res): Promise<void> => {
 });
 
 router.get("/invoices/:id", requireAuth(), async (req, res): Promise<void> => {
-  const userId = req.auth.userId;
+  const userId = req.userId!;
   const params = GetInvoiceParams.safeParse(req.params);
   if (!params.success) {
     res.status(400).json({ error: params.error.message });
@@ -127,7 +127,7 @@ router.get("/invoices/:id", requireAuth(), async (req, res): Promise<void> => {
 });
 
 router.delete("/invoices/:id", requireAuth(), async (req, res): Promise<void> => {
-  const userId = req.auth.userId;
+  const userId = req.userId!;
   const params = DeleteInvoiceParams.safeParse(req.params);
   if (!params.success) {
     res.status(400).json({ error: params.error.message });
@@ -148,7 +148,7 @@ router.delete("/invoices/:id", requireAuth(), async (req, res): Promise<void> =>
 });
 
 router.get("/invoices/:id/pdf", requireAuth(), async (req, res): Promise<void> => {
-  const userId = req.auth.userId;
+  const userId = req.userId!;
   const params = DownloadInvoicePdfParams.safeParse(req.params);
   if (!params.success) {
     res.status(400).json({ error: params.error.message });

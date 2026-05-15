@@ -12,7 +12,7 @@ const router: IRouter = Router();
 
 router.get("/profile", requireAuth(), async (req, res): Promise<void> => {
   try {
-    const userId = req.auth.userId;
+    const userId = req.userId!;
     const [profile] = await db
       .select()
       .from(profilesTable)
@@ -32,7 +32,7 @@ router.get("/profile", requireAuth(), async (req, res): Promise<void> => {
 
 router.put("/profile", requireAuth(), async (req, res): Promise<void> => {
   try {
-    const userId = req.auth.userId;
+    const userId = req.userId!;
     console.log("PUT /profile userId:", userId, "body:", JSON.stringify(req.body));
 
     const parsed = UpsertProfileBody.safeParse(req.body);
