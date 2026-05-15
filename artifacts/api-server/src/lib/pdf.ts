@@ -51,16 +51,20 @@ export function generateInvoicePdf(data: InvoiceData): Promise<Buffer> {
 
     // ── Header ─────────────────────────────────────────────────────────────
     const logoPath = path.join(__dirname, "../logo.png");
+    let headerY = 40;
     if (fs.existsSync(logoPath)) {
       doc.image(logoPath, 40, 30, { height: 52, align: "center" });
-      doc.y = 90;
+      headerY = 90;
     } else {
-      doc.fontSize(20).font("Helvetica-Bold").text(data.shop.shopName, 40, 40, { align: "center", width: pageWidth });
-      doc.moveDown(0.3);
+      doc.fontSize(20).font("Helvetica-Bold").text(data.shop.shopName, 40, headerY, { align: "center", width: pageWidth });
+      headerY = doc.y + 4;
     }
-    doc.fontSize(10).font("Helvetica").text(data.shop.shopAddress, 40, doc.y, { align: "center", width: pageWidth });
-    doc.fontSize(9).text(`GSTIN: ${data.shop.gstNumber}  |  UPI: ${data.shop.upiId}`, { align: "center", width: pageWidth });
-    if (data.shop.phone) doc.text(`Phone: ${data.shop.phone}`, { align: "center", width: pageWidth });
+    doc.fontSize(10).font("Helvetica").text(data.shop.shopAddress, 40, headerY, { align: "center", width: pageWidth });
+    headerY = doc.y + 2;
+    doc.fontSize(9).text(`GSTIN: ${data.shop.gstNumber}  |  UPI: ${data.shop.upiId}`, 40, headerY, { align: "center", width: pageWidth });
+    headerY = doc.y + 2;
+    if (data.shop.phone) { doc.text(`Phone: ${data.shop.phone}`, 40, headerY, { align: "center", width: pageWidth }); headerY = doc.y + 2; }
+    doc.y = headerY;
 
     doc.moveDown(0.5);
     doc.moveTo(40, doc.y).lineTo(doc.page.width - 40, doc.y).stroke();
