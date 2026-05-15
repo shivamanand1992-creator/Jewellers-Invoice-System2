@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Link, useParams } from "wouter";
 import { getInvoice, getGetInvoiceQueryKey } from "@workspace/api-client-react";
 import Layout from "@/components/layout";
+import { getToken } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -20,7 +21,18 @@ export default function InvoiceShow() {
   });
 
   const handleDownloadPdf = () => {
-    window.open(`/api/invoices/${invoiceId}/pdf`, "_blank");
+    const token = getToken();
+    const res = await fetch(`/api/invoices/${invoiceId}/pdf`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) { alert("Failed to download PDF"); return; }
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `invoice-${invoiceId}.pdf`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   if (isLoading) {
