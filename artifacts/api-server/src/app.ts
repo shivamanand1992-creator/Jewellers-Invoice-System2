@@ -13,6 +13,8 @@ import {
 
 const app: Express = express();
 
+const basePath = (process.env.BASE_PATH ?? "").replace(/\/$/, "");
+
 app.use(
   pinoHttp({
     logger,
@@ -52,8 +54,10 @@ app.use("/api", router);
 if (process.env.NODE_ENV === "production") {
   const frontendDist = path.join(process.cwd(), "artifacts/jewellers/dist/public");
   if (fs.existsSync(frontendDist)) {
-    app.use(express.static(frontendDist));
-    app.get(/(.*)/, (_req, res) => {
+    // Serve static assets under basePath
+    app.use(basePath, express.static(frontendDist));
+    // SPA fallback: any route under basePath returns index.html
+    app.get(new RegExp(`^${basePath}(/.*)?$`), (_req, res) => {
       res.sendFile(path.join(frontendDist, "index.html"));
     });
   }
