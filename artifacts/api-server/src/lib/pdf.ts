@@ -91,6 +91,7 @@ export function generateInvoicePdf(data: InvoiceData): Promise<Buffer> {
     // ═══════════════════════════════════════════════════════
     // ── HEADER: Logo left, Shop details right ──────────────────
     const logoPath = path.join(__dirname, "../logo.png");
+    y += 14;
     const headerStartY = y;
     const logoW = 100;
     const detailX = L + logoW + 12;
@@ -317,8 +318,16 @@ export function generateInvoicePdf(data: InvoiceData): Promise<Buffer> {
     const making = parseFloat(data.makingChargesTotal);
     const grandTotal = parseFloat(data.totalAmount);
 
+    // Row subtotals = amount + gemstone + making per item (no GST)
+    const rowSubtotalsSum = data.items.reduce((acc, item) => {
+      return acc +
+        parseFloat(String(item.amount)) +
+        (item.gemstonePrice ? parseFloat(String(item.gemstonePrice)) : 0) +
+        parseFloat(String(item.makingChargeAmount));
+    }, 0);
+
     const totRows: [string, string, boolean][] = [
-      ["TOTAL", fmt(subtotal + making), false],
+      ["TOTAL", fmt(rowSubtotalsSum), false],
       [`CGST @ 1.5% (Jewellery)`, fmt(gstJewel / 2), false],
       [`SGST @ 1.5% (Jewellery)`, fmt(gstJewel / 2), false],
       [`CGST @ 2.5% (Making)`, fmt(gstMaking / 2), false],
