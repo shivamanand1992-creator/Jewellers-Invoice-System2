@@ -227,15 +227,16 @@ export function generateInvoicePdf(data: InvoiceData): Promise<Buffer> {
 
     type Align = "left" | "right" | "center";
     const cols: { label: string; x: number; w: number; align: Align }[] = [
-      { label: "Sr.",            x: L,     w: 20,  align: "center" },
-      { label: "Description",   x: L+20,  w: 138, align: "left"   },
-      { label: "HSN",           x: L+158, w: 46,  align: "center" },
-      { label: "Net Wt",        x: L+204, w: 42,  align: "right"  },
-      { label: "Rate/g",        x: L+246, w: 48,  align: "right"  },
-      { label: "Metal Cost",    x: L+294, w: 52,  align: "right"  },
-      { label: "Gemstone",      x: L+346, w: 52,  align: "right"  },
-      { label: "Making",        x: L+398, w: 48,  align: "right"  },
-      { label: "Subtotal",      x: L+446, w: 89,  align: "right"  },
+      { label: "Sr.",          x: L,     w: 18,  align: "center" },
+      { label: "Description", x: L+18,  w: 118, align: "left"   },
+      { label: "HSN",         x: L+136, w: 42,  align: "center" },
+      { label: "Net Wt",      x: L+178, w: 38,  align: "right"  },
+      { label: "Rate/g",      x: L+216, w: 44,  align: "right"  },
+      { label: "Metal Cost",  x: L+260, w: 48,  align: "right"  },
+      { label: "Gemstone",    x: L+308, w: 48,  align: "right"  },
+      { label: "Amount",      x: L+356, w: 46,  align: "right"  },
+      { label: "Making",      x: L+402, w: 44,  align: "right"  },
+      { label: "Subtotal",    x: L+446, w: 89,  align: "right"  },
     ];
 
     // Header row
@@ -264,20 +265,22 @@ export function generateInvoicePdf(data: InvoiceData): Promise<Buffer> {
         doc.rect(L, y, W, rowH).fillColor("#fafafa").fill();
       }
 
+      const gemstone = item.gemstonePrice ? parseFloat(String(item.gemstonePrice)) : 0;
+      const amount = parseFloat(String(item.amount)); // metal + gemstone
+      const metalCost = amount - gemstone;            // derived metal cost
+      const making = parseFloat(String(item.makingChargeAmount));
+
       const vals: string[] = [
         String(i + 1),
         item.description,
         item.hsnCode ?? "—",
         fmtW(item.netWeight),
         item.sellingPricePerGram ? fmt(item.sellingPricePerGram) : "—",
-        fmt(item.amount),
-        item.gemstonePrice && parseFloat(String(item.gemstonePrice)) > 0 ? fmt(item.gemstonePrice) : "—",
-        fmt(item.makingChargeAmount),
-        fmt(
-          parseFloat(String(item.amount)) +
-          (item.gemstonePrice ? parseFloat(String(item.gemstonePrice)) : 0) +
-          parseFloat(String(item.makingChargeAmount))
-        ),
+        metalCost > 0 ? fmt(metalCost) : "—",
+        gemstone > 0 ? fmt(gemstone) : "—",
+        fmt(amount),
+        fmt(making),
+        fmt(amount + making),
       ];
 
       doc.font("Helvetica").fontSize(8.5).fillColor("#000000");
@@ -318,12 +321,11 @@ export function generateInvoicePdf(data: InvoiceData): Promise<Buffer> {
     const making = parseFloat(data.makingChargesTotal);
     const grandTotal = parseFloat(data.totalAmount);
 
-    // TOTAL = sum of all row subtotals (metal + gemstone + making, no GST)
+    // TOTAL = sum of (amount + making) per item; amount already includes gemstone
     const rowSubtotalsSum = data.items.reduce((acc, item) => {
-      const metal = parseFloat(String(item.amount));
-      const gem = item.gemstonePrice ? parseFloat(String(item.gemstonePrice)) : 0;
+      const amount = parseFloat(String(item.amount));
       const making = parseFloat(String(item.makingChargeAmount));
-      return acc + metal + gem + making;
+      return acc + amount + making;
     }, 0);
 
     const totRows: [string, string, boolean][] = [

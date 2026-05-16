@@ -96,21 +96,30 @@ export default function InvoiceNew() {
       const gemstonePrice = Number(item.gemstonePrice) || 0;
       const makingChargePercent = Number(item.makingChargePercent) || 0;
 
-      let amount = Number(item.amount) || 0;
+      // Metal cost = Net Weight x Rate/g (auto if both provided)
+      const metalCost = (netWeight > 0 && sellingPricePerGram > 0)
+        ? parseFloat((netWeight * sellingPricePerGram).toFixed(2))
+        : 0;
 
-      // Auto-calc amount = Net Weight x Rate/g (metal cost only, gemstone is separate)
+      // Amount = Metal Cost + Gemstone (if weight-based)
+      // OR user-entered amount directly (if no weight/rate provided)
+      let amount: number;
       if (netWeight > 0 && sellingPricePerGram > 0) {
-        amount = parseFloat((netWeight * sellingPricePerGram).toFixed(2));
+        // Weight-based: auto-calculate amount
+        amount = parseFloat((metalCost + gemstonePrice).toFixed(2));
         setValue(`items.${idx}.amount`, amount, { shouldDirty: true });
+      } else {
+        // Fixed price: user enters amount directly
+        amount = Number(item.amount) || 0;
       }
 
-      // Making charge on metal + gemstone combined
-      const makingChargeAmount = parseFloat(((amount + gemstonePrice) * makingChargePercent / 100).toFixed(2));
-      // GST on metal amount only (3%)
+      // Making charge on full amount (metal + gemstone)
+      const makingChargeAmount = parseFloat((amount * makingChargePercent / 100).toFixed(2));
+      // GST: 3% on amount, 5% on making
       const gstJewel = parseFloat((amount * 0.03).toFixed(2));
       const gstMaking = parseFloat((makingChargeAmount * 0.05).toFixed(2));
-      // itemTotal = metal cost + gemstone + making (GST shown separately in summary)
-      const itemTotal = parseFloat((amount + gemstonePrice + makingChargeAmount).toFixed(2));
+      // Row subtotal = amount + making (no GST — shown separately in summary)
+      const itemTotal = parseFloat((amount + makingChargeAmount).toFixed(2));
 
       setValue(`items.${idx}.makingChargeAmount`, makingChargeAmount, { shouldDirty: true });
       setValue(`items.${idx}.gstJewel`, gstJewel, { shouldDirty: true });
@@ -119,13 +128,12 @@ export default function InvoiceNew() {
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    // Only re-run when these specific fields change
     items.map(i => `${i.netWeight}|${i.sellingPricePerGram}|${i.gemstonePrice}|${i.amount}|${i.makingChargePercent}`).join(","),
   ]);
 
   const totals = (items ?? []).reduce(
     (acc, item) => {
-      acc.subtotal += Number(item.amount) || 0;
+      acc.subtotal += Number(item.amount) || 0; // amount = metal+gemstone (or direct entry)
       acc.making += Number(item.makingChargeAmount) || 0;
       acc.gstJewel += Number(item.gstJewel) || 0;
       acc.gstMaking += Number(item.gstMaking) || 0;
@@ -355,18 +363,24 @@ function ItemRow({
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div className="space-y-1">
-          <Label className="text-xs">Amount (₹)</Label>
+          <Label className="text-xs">
+            Amount (₹)
+            {(Number(item.netWeight) > 0 && Number(item.sellingPricePerGram) > 0)
+              ? <span className="ml-1 text-muted-foreground">(Metal + Gemstone)</span>
+              : <span className="ml-1 text-muted-foreground">(Enter directly)</span>}
+          </Label>
           <Input
             type="number"
             step="0.01"
-            placeholder="Auto-calculated"
+            placeholder="Auto-calculated or enter manually"
             {...register(`items.${idx}.amount`)}
             className="font-mono"
+            readOnly={Number(item.netWeight) > 0 && Number(item.sellingPricePerGram) > 0}
           />
           {e?.amount && <p className="text-xs text-destructive">{e.amount.message}</p>}
         </div>
         <div className="space-y-1">
-          <Label className="text-xs">Making % </Label>
+          <Label className="text-xs">Making %</Label>
           <Input type="number" step="0.01" placeholder="10" {...register(`items.${idx}.makingChargePercent`)} />
         </div>
         <div className="space-y-1">

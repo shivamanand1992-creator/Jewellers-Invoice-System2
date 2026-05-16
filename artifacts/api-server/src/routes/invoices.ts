@@ -49,15 +49,14 @@ router.post("/invoices", requireAuth(), async (req, res): Promise<void> => {
   let gstMakingTotal = 0;
 
   for (const item of items) {
-    subtotalAmount += item.amount;              // metal cost = netWt x rate/g
-    gemstoneTotal += item.gemstonePrice ?? 0;  // gemstone separate
+    subtotalAmount += item.amount; // amount = metal cost + gemstone
     makingChargesTotal += item.makingChargeAmount;
     gstJewelTotal += item.gstJewel;
     gstMakingTotal += item.gstMaking;
   }
 
-  // Grand total = metal + gemstone + making + GST
-  const totalAmount = subtotalAmount + gemstoneTotal + makingChargesTotal + gstJewelTotal + gstMakingTotal;
+  // Grand total = (amount + making) + GST
+  const totalAmount = subtotalAmount + makingChargesTotal + gstJewelTotal + gstMakingTotal;
 
   const [invoice] = await db
     .insert(invoicesTable)
@@ -68,7 +67,7 @@ router.post("/invoices", requireAuth(), async (req, res): Promise<void> => {
       customerAddress: customerAddress ?? null,
       customerGstin: customerGstin ?? null,
       invoiceDate,
-      subtotalAmount: (subtotalAmount + gemstoneTotal).toFixed(2), // metal + gemstone = jewel value
+      subtotalAmount: subtotalAmount.toFixed(2),
       makingChargesTotal: makingChargesTotal.toFixed(2),
       gstJewelTotal: gstJewelTotal.toFixed(2),
       gstMakingTotal: gstMakingTotal.toFixed(2),
