@@ -98,13 +98,15 @@ export default function InvoiceNew() {
 
       let amount = Number(item.amount) || 0;
 
-      // Auto-calc amount if we have weights + rate
+      // Auto-calc amount = Net Weight x Rate/g (metal cost only, gemstone is separate)
       if (netWeight > 0 && sellingPricePerGram > 0) {
-        amount = netWeight * sellingPricePerGram + gemstonePrice;
-        setValue(`items.${idx}.amount`, parseFloat(amount.toFixed(2)), { shouldDirty: true });
+        amount = parseFloat((netWeight * sellingPricePerGram).toFixed(2));
+        setValue(`items.${idx}.amount`, amount, { shouldDirty: true });
       }
 
+      // Making charge on metal amount only (not gemstone)
       const makingChargeAmount = parseFloat((amount * makingChargePercent / 100).toFixed(2));
+      // GST on metal amount + making charges
       const gstJewel = parseFloat((amount * 0.03).toFixed(2));
       const gstMaking = parseFloat((makingChargeAmount * 0.05).toFixed(2));
       const itemTotal = parseFloat((amount + makingChargeAmount + gstJewel + gstMaking).toFixed(2));
