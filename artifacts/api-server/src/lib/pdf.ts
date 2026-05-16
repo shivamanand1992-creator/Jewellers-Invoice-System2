@@ -89,38 +89,48 @@ export function generateInvoicePdf(data: InvoiceData): Promise<Buffer> {
     // ═══════════════════════════════════════════════════════
     // HEADER — Logo + Shop Name + Address
     // ═══════════════════════════════════════════════════════
+    // ── HEADER: Logo left, Shop details right ──────────────────
     const logoPath = path.join(__dirname, "../logo.png");
+    const headerStartY = y;
+    const logoW = 100;
+    const detailX = L + logoW + 12;
+    const detailW = R - detailX;
+
     if (fs.existsSync(logoPath)) {
-      doc.image(logoPath, L + W / 2 - 30, y, { height: 56 });
-      y += 62;
+      doc.image(logoPath, L, y, { width: logoW, height: logoW });
     }
 
-    doc.font("Helvetica-Bold").fontSize(16).fillColor("#000000")
-       .text(data.shop.shopName, L, y, { width: W, align: "center" });
-    y += 20;
+    // Shop details on the right
+    let dy = headerStartY + 4;
+    doc.font("Helvetica-Bold").fontSize(18).fillColor("#000000")
+       .text(data.shop.shopName, detailX, dy, { width: detailW });
+    dy += 24;
 
-    doc.font("Helvetica").fontSize(8.5).fillColor("#222222")
-       .text(data.shop.shopAddress, L, y, { width: W, align: "center" });
-    y += 12;
+    doc.font("Helvetica").fontSize(9).fillColor("#333333")
+       .text(data.shop.shopAddress, detailX, dy, { width: detailW });
+    dy += 14;
 
-    const contactLine = [
-      data.shop.phone ? `Mobile: ${data.shop.phone}` : "",
-      data.shop.email ? `Email: ${data.shop.email}` : "",
-    ].filter(Boolean).join("  |  ");
-    if (contactLine) {
-      doc.font("Helvetica").fontSize(8.5).fillColor("#222222")
-         .text(contactLine, L, y, { width: W, align: "center" });
-      y += 12;
+    if (data.shop.phone) {
+      doc.font("Helvetica").fontSize(9).fillColor("#333333")
+         .text(`Mobile: ${data.shop.phone}`, detailX, dy, { width: detailW });
+      dy += 13;
+    }
+    if (data.shop.email) {
+      doc.font("Helvetica").fontSize(9).fillColor("#333333")
+         .text(`Email: ${data.shop.email}`, detailX, dy, { width: detailW });
+      dy += 13;
     }
 
-    doc.font("Helvetica").fontSize(8.5).fillColor("#222222")
-       .text(`GSTIN: ${data.shop.gstNumber}  |  State: ${data.shop.state}`, L, y, { width: W, align: "center" });
-    y += 6;
+    doc.font("Helvetica").fontSize(9).fillColor("#333333")
+       .text(`GSTIN: ${data.shop.gstNumber}  |  State: ${data.shop.state}`, detailX, dy, { width: detailW });
+    dy += 13;
+
+    // Use the taller of logo or text block
+    y = Math.max(headerStartY + logoW, dy) + 8;
 
     hline(doc, L, y, R, "#000000", 1.5);
     y += 4;
 
-    // Tax Invoice label
     doc.font("Helvetica-Bold").fontSize(11).fillColor("#000000")
        .text("Tax Invoice", L, y, { width: W, align: "center" });
     y += 16;
