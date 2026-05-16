@@ -104,9 +104,9 @@ export default function InvoiceNew() {
         setValue(`items.${idx}.amount`, amount, { shouldDirty: true });
       }
 
-      // Making charge on metal amount only (not gemstone)
-      const makingChargeAmount = parseFloat((amount * makingChargePercent / 100).toFixed(2));
-      // GST on metal amount + making charges
+      // Making charge on metal + gemstone combined
+      const makingChargeAmount = parseFloat(((amount + gemstonePrice) * makingChargePercent / 100).toFixed(2));
+      // GST on metal amount only (3%)
       const gstJewel = parseFloat((amount * 0.03).toFixed(2));
       const gstMaking = parseFloat((makingChargeAmount * 0.05).toFixed(2));
       // itemTotal = metal cost + gemstone + making (GST shown separately in summary)
