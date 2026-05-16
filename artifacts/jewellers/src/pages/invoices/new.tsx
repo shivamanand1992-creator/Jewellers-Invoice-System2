@@ -109,7 +109,8 @@ export default function InvoiceNew() {
       // GST on metal amount + making charges
       const gstJewel = parseFloat((amount * 0.03).toFixed(2));
       const gstMaking = parseFloat((makingChargeAmount * 0.05).toFixed(2));
-      const itemTotal = parseFloat((amount + makingChargeAmount + gstJewel + gstMaking).toFixed(2));
+      // itemTotal = metal cost + gemstone + making (GST shown separately in summary)
+      const itemTotal = parseFloat((amount + gemstonePrice + makingChargeAmount).toFixed(2));
 
       setValue(`items.${idx}.makingChargeAmount`, makingChargeAmount, { shouldDirty: true });
       setValue(`items.${idx}.gstJewel`, gstJewel, { shouldDirty: true });
@@ -124,7 +125,7 @@ export default function InvoiceNew() {
 
   const totals = (items ?? []).reduce(
     (acc, item) => {
-      acc.subtotal += Number(item.amount) || 0;
+      acc.subtotal += (Number(item.amount) || 0) + (Number(item.gemstonePrice) || 0);
       acc.making += Number(item.makingChargeAmount) || 0;
       acc.gstJewel += Number(item.gstJewel) || 0;
       acc.gstMaking += Number(item.gstMaking) || 0;

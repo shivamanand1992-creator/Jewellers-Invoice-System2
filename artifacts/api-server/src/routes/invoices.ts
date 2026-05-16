@@ -48,12 +48,13 @@ router.post("/invoices", requireAuth(), async (req, res): Promise<void> => {
   let gstMakingTotal = 0;
 
   for (const item of items) {
-    subtotalAmount += item.amount;
+    subtotalAmount += item.amount + (item.gemstonePrice ?? 0); // metal + gemstone
     makingChargesTotal += item.makingChargeAmount;
     gstJewelTotal += item.gstJewel;
     gstMakingTotal += item.gstMaking;
   }
 
+  // Grand total = (metal + gemstone + making) + GST
   const totalAmount = subtotalAmount + makingChargesTotal + gstJewelTotal + gstMakingTotal;
 
   const [invoice] = await db
