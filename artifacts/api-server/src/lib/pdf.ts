@@ -206,14 +206,15 @@ export function generateInvoicePdf(data: InvoiceData): Promise<Buffer> {
 
     type Align = "left" | "right" | "center";
     const cols: { label: string; x: number; w: number; align: Align }[] = [
-      { label: "Sr.",         x: L,     w: 25,  align: "center" },
-      { label: "Description", x: L+25,  w: 175, align: "left"   },
-      { label: "HSN Code",    x: L+200, w: 60,  align: "center" },
-      { label: "Net Wt",      x: L+260, w: 50,  align: "right"  },
-      { label: "Rate/g",      x: L+310, w: 58,  align: "right"  },
-      { label: "Amount",      x: L+368, w: 65,  align: "right"  },
-      { label: "Making",      x: L+433, w: 55,  align: "right"  },
-      { label: "Total (INR)", x: L+488, w: 77,  align: "right"  },
+      { label: "Sr.",         x: L,     w: 22,  align: "center" },
+      { label: "Description", x: L+22,  w: 148, align: "left"   },
+      { label: "HSN Code",    x: L+170, w: 52,  align: "center" },
+      { label: "Net Wt",      x: L+222, w: 44,  align: "right"  },
+      { label: "Rate/g",      x: L+266, w: 50,  align: "right"  },
+      { label: "Amount",      x: L+316, w: 55,  align: "right"  },
+      { label: "Gemstone",    x: L+371, w: 55,  align: "right"  },
+      { label: "Making",      x: L+426, w: 48,  align: "right"  },
+      { label: "Total (INR)", x: L+474, w: 91,  align: "right"  },
     ];
 
     // Header row
@@ -249,6 +250,7 @@ export function generateInvoicePdf(data: InvoiceData): Promise<Buffer> {
         fmtW(item.netWeight),
         item.sellingPricePerGram ? fmt(item.sellingPricePerGram) : "—",
         fmt(item.amount),
+        item.gemstonePrice && parseFloat(String(item.gemstonePrice)) > 0 ? fmt(item.gemstonePrice) : "—",
         fmt(item.makingChargeAmount),
         fmt(item.itemTotal),
       ];
