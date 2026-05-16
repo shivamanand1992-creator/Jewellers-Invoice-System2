@@ -133,15 +133,15 @@ export default function InvoiceNew() {
 
   const totals = (items ?? []).reduce(
     (acc, item) => {
-      acc.subtotal += Number(item.amount) || 0; // amount = metal+gemstone (or direct entry)
+      acc.subtotal += Number(item.amount) || 0;
       acc.making += Number(item.makingChargeAmount) || 0;
       acc.gstJewel += Number(item.gstJewel) || 0;
       acc.gstMaking += Number(item.gstMaking) || 0;
-      acc.total += Number(item.itemTotal) || 0;
       return acc;
     },
-    { subtotal: 0, making: 0, gstJewel: 0, gstMaking: 0, total: 0 },
+    { subtotal: 0, making: 0, gstJewel: 0, gstMaking: 0 },
   );
+  const grandTotal = totals.subtotal + totals.making + totals.gstJewel + totals.gstMaking;
 
   const { mutate: createInvoice, isPending } = useCreateInvoice({
     mutation: {
@@ -278,7 +278,7 @@ export default function InvoiceNew() {
               <Separator />
               <div className="flex justify-between font-bold text-base">
                 <span>Grand Total</span>
-                <span className="text-primary font-mono">{formatIndianCurrency(totals.total)}</span>
+                <span className="text-primary font-mono">{formatIndianCurrency(grandTotal)}</span>
               </div>
             </div>
           </div>
