@@ -125,7 +125,7 @@ export default function InvoiceNew() {
 
   const totals = (items ?? []).reduce(
     (acc, item) => {
-      acc.subtotal += (Number(item.amount) || 0) + (Number(item.gemstonePrice) || 0);
+      acc.subtotal += Number(item.amount) || 0;
       acc.making += Number(item.makingChargeAmount) || 0;
       acc.gstJewel += Number(item.gstJewel) || 0;
       acc.gstMaking += Number(item.gstMaking) || 0;

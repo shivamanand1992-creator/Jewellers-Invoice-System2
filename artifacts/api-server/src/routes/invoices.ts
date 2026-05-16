@@ -42,20 +42,22 @@ router.post("/invoices", requireAuth(), async (req, res): Promise<void> => {
   const nextNum = (existingCount.length + 1).toString().padStart(3, "0");
   const invoiceNumber = `INV-${nextNum}`;
 
-  let subtotalAmount = 0;
+  let subtotalAmount = 0;   // metal costs only
+  let gemstoneTotal = 0;    // all gemstone costs
   let makingChargesTotal = 0;
   let gstJewelTotal = 0;
   let gstMakingTotal = 0;
 
   for (const item of items) {
-    subtotalAmount += item.amount + (item.gemstonePrice ?? 0); // metal + gemstone
+    subtotalAmount += item.amount;              // metal cost = netWt x rate/g
+    gemstoneTotal += item.gemstonePrice ?? 0;  // gemstone separate
     makingChargesTotal += item.makingChargeAmount;
     gstJewelTotal += item.gstJewel;
     gstMakingTotal += item.gstMaking;
   }
 
-  // Grand total = (metal + gemstone + making) + GST
-  const totalAmount = subtotalAmount + makingChargesTotal + gstJewelTotal + gstMakingTotal;
+  // Grand total = metal + gemstone + making + GST
+  const totalAmount = subtotalAmount + gemstoneTotal + makingChargesTotal + gstJewelTotal + gstMakingTotal;
 
   const [invoice] = await db
     .insert(invoicesTable)
@@ -66,7 +68,7 @@ router.post("/invoices", requireAuth(), async (req, res): Promise<void> => {
       customerAddress: customerAddress ?? null,
       customerGstin: customerGstin ?? null,
       invoiceDate,
-      subtotalAmount: subtotalAmount.toFixed(2),
+      subtotalAmount: (subtotalAmount + gemstoneTotal).toFixed(2), // metal + gemstone = jewel value
       makingChargesTotal: makingChargesTotal.toFixed(2),
       gstJewelTotal: gstJewelTotal.toFixed(2),
       gstMakingTotal: gstMakingTotal.toFixed(2),
