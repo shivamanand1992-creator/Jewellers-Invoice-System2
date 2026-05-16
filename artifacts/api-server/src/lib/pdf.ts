@@ -46,18 +46,18 @@ function amountInWords(amount: number): string {
 
   function toWords(n: number): string {
     if (n === 0) return "";
-    if (n < 20) return ones[n] + " ";
-    if (n < 100) return tens[Math.floor(n / 10)] + (n % 10 ? " " + ones[n % 10] : "") + " ";
-    if (n < 1000) return ones[Math.floor(n / 100)] + " Hundred " + toWords(n % 100);
-    if (n < 100000) return toWords(Math.floor(n / 1000)) + "Thousand " + toWords(n % 1000);
-    if (n < 10000000) return toWords(Math.floor(n / 100000)) + "Lakh " + toWords(n % 100000);
-    return toWords(Math.floor(n / 10000000)) + "Crore " + toWords(n % 10000000);
+    if (n < 20) return ones[n];
+    if (n < 100) return tens[Math.floor(n / 10)] + (n % 10 ? " " + ones[n % 10] : "");
+    if (n < 1000) return ones[Math.floor(n / 100)] + " Hundred" + (n % 100 ? " " + toWords(n % 100) : "");
+    if (n < 100000) return toWords(Math.floor(n / 1000)) + " Thousand" + (n % 1000 ? " " + toWords(n % 1000) : "");
+    if (n < 10000000) return toWords(Math.floor(n / 100000)) + " Lakh" + (n % 100000 ? " " + toWords(n % 100000) : "");
+    return toWords(Math.floor(n / 10000000)) + " Crore" + (n % 10000000 ? " " + toWords(n % 10000000) : "");
   }
 
   const rupees = Math.floor(amount);
   const paise = Math.round((amount - rupees) * 100);
-  let result = "Rs. " + toWords(rupees).trim() + " Only";
-  if (paise > 0) result = "Rs. " + toWords(rupees).trim() + "and " + toWords(paise).trim() + "Paise Only";
+  let result = "Rs. " + toWords(rupees) + " Only";
+  if (paise > 0) result = "Rs. " + toWords(rupees) + " and " + toWords(paise) + " Paise Only";
   return result;
 }
 
@@ -91,8 +91,8 @@ export function generateInvoicePdf(data: InvoiceData): Promise<Buffer> {
     // ═══════════════════════════════════════════════════════
     const logoPath = path.join(__dirname, "../logo.png");
     if (fs.existsSync(logoPath)) {
-      doc.image(logoPath, L + W / 2 - 20, y, { height: 40 });
-      y += 46;
+      doc.image(logoPath, L + W / 2 - 30, y, { height: 56 });
+      y += 62;
     }
 
     doc.font("Helvetica-Bold").fontSize(16).fillColor("#000000")
@@ -115,7 +115,7 @@ export function generateInvoicePdf(data: InvoiceData): Promise<Buffer> {
 
     doc.font("Helvetica").fontSize(8.5).fillColor("#222222")
        .text(`GSTIN: ${data.shop.gstNumber}  |  State: ${data.shop.state}`, L, y, { width: W, align: "center" });
-    y += 10;
+    y += 6;
 
     hline(doc, L, y, R, "#000000", 1.5);
     y += 4;
@@ -206,15 +206,15 @@ export function generateInvoicePdf(data: InvoiceData): Promise<Buffer> {
 
     type Align = "left" | "right" | "center";
     const cols: { label: string; x: number; w: number; align: Align }[] = [
-      { label: "Sr.",         x: L,     w: 22,  align: "center" },
-      { label: "Description", x: L+22,  w: 148, align: "left"   },
-      { label: "HSN Code",    x: L+170, w: 52,  align: "center" },
-      { label: "Net Wt",      x: L+222, w: 44,  align: "right"  },
-      { label: "Rate/g",      x: L+266, w: 50,  align: "right"  },
-      { label: "Amount",      x: L+316, w: 55,  align: "right"  },
-      { label: "Gemstone",    x: L+371, w: 55,  align: "right"  },
-      { label: "Making",      x: L+426, w: 48,  align: "right"  },
-      { label: "Total (INR)", x: L+474, w: 91,  align: "right"  },
+      { label: "Sr.",            x: L,     w: 20,  align: "center" },
+      { label: "Description",   x: L+20,  w: 138, align: "left"   },
+      { label: "HSN",           x: L+158, w: 46,  align: "center" },
+      { label: "Net Wt",        x: L+204, w: 42,  align: "right"  },
+      { label: "Rate/g",        x: L+246, w: 48,  align: "right"  },
+      { label: "Amount",        x: L+294, w: 52,  align: "right"  },
+      { label: "Gemstone",      x: L+346, w: 52,  align: "right"  },
+      { label: "Making",        x: L+398, w: 48,  align: "right"  },
+      { label: "Subtotal",      x: L+446, w: 89,  align: "right"  },
     ];
 
     // Header row
@@ -252,7 +252,11 @@ export function generateInvoicePdf(data: InvoiceData): Promise<Buffer> {
         fmt(item.amount),
         item.gemstonePrice && parseFloat(String(item.gemstonePrice)) > 0 ? fmt(item.gemstonePrice) : "—",
         fmt(item.makingChargeAmount),
-        fmt(item.itemTotal),
+        fmt(
+          parseFloat(String(item.amount)) +
+          (item.gemstonePrice ? parseFloat(String(item.gemstonePrice)) : 0) +
+          parseFloat(String(item.makingChargeAmount))
+        ),
       ];
 
       doc.font("Helvetica").fontSize(8.5).fillColor("#000000");
