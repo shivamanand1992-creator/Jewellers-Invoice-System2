@@ -190,6 +190,10 @@ export function generateInvoicePdf(data: InvoiceData): Promise<Buffer> {
       ly += 12;
     }
 
+    doc.font("Helvetica").fontSize(8.5).fillColor("#333333")
+       .text("Place of Supply  :  " + data.shop.state, lx, ly, { width: lw });
+    ly += 12;
+
 
 
     // Right: Invoice details
