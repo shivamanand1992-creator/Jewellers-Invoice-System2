@@ -96,12 +96,24 @@ export function generateInvoicePdf(data: InvoiceData): Promise<Buffer> {
     const detailX = L + logoW + 12;
     const detailW = R - detailX;
 
+    // Calculate text block height first to center logo
+    const shopLines = [
+      data.shop.shopName,
+      data.shop.shopAddress,
+      data.shop.phone ? `Mobile: ${data.shop.phone}` : null,
+      data.shop.email ? `Email: ${data.shop.email}` : null,
+      `GSTIN: ${data.shop.gstNumber}  |  State: ${data.shop.state}`,
+    ].filter(Boolean);
+    const textBlockH = 24 + (shopLines.length - 1) * 13 + 8;
+
     if (fs.existsSync(logoPath)) {
-      doc.image(logoPath, L, y, { width: logoW, height: logoW });
+      const logoH = Math.min(logoW, textBlockH);
+      const logoTopY = headerStartY + (textBlockH - logoH) / 2;
+      doc.image(logoPath, L, logoTopY, { width: logoW, height: logoH });
     }
 
     // Shop details on the right
-    let dy = headerStartY + 4;
+    let dy = headerStartY;
     doc.font("Helvetica-Bold").fontSize(18).fillColor("#000000")
        .text(data.shop.shopName, detailX, dy, { width: detailW });
     dy += 24;
@@ -177,9 +189,7 @@ export function generateInvoicePdf(data: InvoiceData): Promise<Buffer> {
       ly += 12;
     }
 
-    doc.font("Helvetica").fontSize(8.5).fillColor("#333333")
-       .text("State     :  Delhi", lx, ly, { width: lw });
-    ly += 12;
+
 
     // Right: Invoice details
     const rx = midX + 4;
