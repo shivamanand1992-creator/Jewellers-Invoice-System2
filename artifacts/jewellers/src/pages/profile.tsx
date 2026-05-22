@@ -72,7 +72,7 @@ const profileSchema = z.object({
   gstNumber: z
     .string()
     .min(1, "GST number is required")
-    .regex(GSTIN_REGEX, "Invalid GSTIN format (e.g. 07AABCS1429B1ZP)"),
+    .refine((v) => GSTIN_REGEX.test(v.toUpperCase()), "Invalid GSTIN format (e.g. 07AABCS1429B1ZP)"),
   upiId: z.string().min(1, "UPI ID is required"),
   state: z.string().min(1, "State is required"),
   phone: z.string().optional(),
@@ -131,7 +131,7 @@ export default function Profile() {
         reset({
           shopName: data.shopName,
           shopAddress: data.shopAddress,
-          gstNumber: data.gstNumber,
+          gstNumber: data.gstNumber.toUpperCase(),
           upiId: data.upiId,
           state: data.state,
           phone: data.phone ?? "",
@@ -149,7 +149,7 @@ export default function Profile() {
       data: {
         shopName: data.shopName,
         shopAddress: data.shopAddress,
-        gstNumber: data.gstNumber,
+        gstNumber: data.gstNumber.toUpperCase(),
         upiId: data.upiId,
         state: data.state,
         phone: data.phone || undefined,

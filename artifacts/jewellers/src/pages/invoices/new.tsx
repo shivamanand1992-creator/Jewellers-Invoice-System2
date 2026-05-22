@@ -43,7 +43,7 @@ const invoiceSchema = z.object({
   customerGstin: z
     .string()
     .optional()
-    .refine((v) => !v || GSTIN_REGEX.test(v), {
+    .refine((v) => !v || GSTIN_REGEX.test(v.toUpperCase()), {
       message: "Invalid GSTIN format (e.g. 07AABCS1429B1ZP)",
     }),
   invoiceDate: z.string().min(1, "Date required"),
@@ -236,7 +236,7 @@ export default function InvoiceNew() {
       data: {
         customerName: data.customerName,
         customerAddress: data.customerAddress || undefined,
-        customerGstin: data.customerGstin || undefined,
+        customerGstin: data.customerGstin?.toUpperCase() || undefined,
         invoiceDate: data.invoiceDate,
         items: data.items.map((item) => ({
           itemType: item.itemType || undefined,

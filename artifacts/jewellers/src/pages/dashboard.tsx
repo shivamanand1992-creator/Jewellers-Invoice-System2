@@ -7,6 +7,8 @@ import {
   getGetMonthlyGstQueryKey,
   getRecentInvoices,
   getGetRecentInvoicesQueryKey,
+  getProfile,
+  getGetProfileUrl,
 } from "@workspace/api-client-react";
 import Layout from "@/components/layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -30,6 +32,7 @@ import {
   IndianRupee,
   PlusCircle,
   ArrowRight,
+  AlertCircle,
 } from "lucide-react";
 
 export default function Dashboard() {
@@ -47,6 +50,14 @@ export default function Dashboard() {
     queryKey: getGetRecentInvoicesQueryKey(),
     queryFn: () => getRecentInvoices(),
   });
+
+  const { data: profile, isLoading: profileLoading } = useQuery({
+    queryKey: [getGetProfileUrl()],
+    queryFn: () => getProfile(),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const profileIncomplete = !profileLoading && (!profile?.shopName || !profile?.gstNumber);
 
   const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   const chartData = (monthlyGst ?? []).map((m) => ({
@@ -70,6 +81,22 @@ export default function Dashboard() {
             </Button>
           </Link>
         </div>
+
+        {/* Onboarding banner — shown when shop profile is not set up */}
+        {profileIncomplete && (
+          <div className="flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-lg px-4 py-3">
+            <AlertCircle className="h-4 w-4 text-amber-600 shrink-0" />
+            <div className="flex-1 text-sm text-amber-800">
+              <span className="font-semibold">Shop profile incomplete.</span>{" "}
+              Your invoices won't show your business name, address, or GSTIN until you set it up.
+            </div>
+            <Link href="/profile">
+              <Button variant="outline" size="sm" className="shrink-0">
+                Set Up Profile
+              </Button>
+            </Link>
+          </div>
+        )}
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
