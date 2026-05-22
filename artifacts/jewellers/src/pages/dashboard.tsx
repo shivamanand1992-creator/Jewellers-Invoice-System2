@@ -108,7 +108,9 @@ export default function Dashboard() {
         {/* Monthly GST Chart */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-base font-semibold">Monthly GST Breakdown ({new Date().getFullYear()})</CardTitle>
+            <CardTitle className="text-base font-semibold">
+            Monthly GST Breakdown — FY {new Date().getMonth() >= 3 ? new Date().getFullYear() : new Date().getFullYear() - 1}–{String(new Date().getMonth() >= 3 ? new Date().getFullYear() + 1 : new Date().getFullYear()).slice(2)}
+          </CardTitle>
           </CardHeader>
           <CardContent>
             {gstLoading ? (

@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import {
@@ -14,13 +14,65 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Building2, Save } from "lucide-react";
+
+const GSTIN_REGEX = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
+
+const INDIAN_STATES = [
+  "Andhra Pradesh",
+  "Arunachal Pradesh",
+  "Assam",
+  "Bihar",
+  "Chhattisgarh",
+  "Goa",
+  "Gujarat",
+  "Haryana",
+  "Himachal Pradesh",
+  "Jharkhand",
+  "Karnataka",
+  "Kerala",
+  "Madhya Pradesh",
+  "Maharashtra",
+  "Manipur",
+  "Meghalaya",
+  "Mizoram",
+  "Nagaland",
+  "Odisha",
+  "Punjab",
+  "Rajasthan",
+  "Sikkim",
+  "Tamil Nadu",
+  "Telangana",
+  "Tripura",
+  "Uttar Pradesh",
+  "Uttarakhand",
+  "West Bengal",
+  // Union Territories
+  "Andaman and Nicobar Islands",
+  "Chandigarh",
+  "Dadra and Nagar Haveli and Daman and Diu",
+  "Delhi",
+  "Jammu and Kashmir",
+  "Ladakh",
+  "Lakshadweep",
+  "Puducherry",
+];
 
 const profileSchema = z.object({
   shopName: z.string().min(1, "Shop name is required"),
   shopAddress: z.string().min(1, "Address is required"),
-  gstNumber: z.string().min(1, "GST number is required"),
+  gstNumber: z
+    .string()
+    .min(1, "GST number is required")
+    .regex(GSTIN_REGEX, "Invalid GSTIN format (e.g. 07AABCS1429B1ZP)"),
   upiId: z.string().min(1, "UPI ID is required"),
   state: z.string().min(1, "State is required"),
   phone: z.string().optional(),
@@ -42,6 +94,7 @@ export default function Profile() {
     register,
     handleSubmit,
     reset,
+    control,
     formState: { errors, isDirty },
   } = useForm<ProfileForm>({
     resolver: zodResolver(profileSchema),
@@ -125,39 +178,98 @@ export default function Profile() {
 
           {isLoading ? (
             <div className="space-y-4">
-              {[...Array(6)].map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}
+              {[...Array(6)].map((_, i) => (
+                <Skeleton key={i} className="h-10 w-full" />
+              ))}
             </div>
           ) : (
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <Label htmlFor="shopName">Shop Name <span className="text-destructive">*</span></Label>
-                  <Input id="shopName" placeholder="S.S. Jewellers" {...register("shopName")} />
-                  {errors.shopName && <p className="text-xs text-destructive">{errors.shopName.message}</p>}
+                  <Label htmlFor="shopName">
+                    Shop Name <span className="text-destructive">*</span>
+                  </Label>
+                  <Input
+                    id="shopName"
+                    placeholder="S.S. Jewellers"
+                    {...register("shopName")}
+                  />
+                  {errors.shopName && (
+                    <p className="text-xs text-destructive">{errors.shopName.message}</p>
+                  )}
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="state">State <span className="text-destructive">*</span></Label>
-                  <Input id="state" placeholder="Delhi" {...register("state")} />
-                  {errors.state && <p className="text-xs text-destructive">{errors.state.message}</p>}
+                  <Label htmlFor="state">
+                    State <span className="text-destructive">*</span>
+                  </Label>
+                  <Controller
+                    name="state"
+                    control={control}
+                    render={({ field }) => (
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
+                      >
+                        <SelectTrigger id="state">
+                          <SelectValue placeholder="Select state…" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {INDIAN_STATES.map((s) => (
+                            <SelectItem key={s} value={s}>
+                              {s}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                  {errors.state && (
+                    <p className="text-xs text-destructive">{errors.state.message}</p>
+                  )}
                 </div>
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="shopAddress">Shop Address <span className="text-destructive">*</span></Label>
-                <Input id="shopAddress" placeholder="123 Jewellers Market, Karol Bagh, Delhi" {...register("shopAddress")} />
-                {errors.shopAddress && <p className="text-xs text-destructive">{errors.shopAddress.message}</p>}
+                <Label htmlFor="shopAddress">
+                  Shop Address <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  id="shopAddress"
+                  placeholder="123 Jewellers Market, Karol Bagh, Delhi"
+                  {...register("shopAddress")}
+                />
+                {errors.shopAddress && (
+                  <p className="text-xs text-destructive">{errors.shopAddress.message}</p>
+                )}
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <Label htmlFor="gstNumber">GST Number <span className="text-destructive">*</span></Label>
-                  <Input id="gstNumber" placeholder="07AABCS1429B1ZP" className="font-mono" {...register("gstNumber")} />
-                  {errors.gstNumber && <p className="text-xs text-destructive">{errors.gstNumber.message}</p>}
+                  <Label htmlFor="gstNumber">
+                    GST Number <span className="text-destructive">*</span>
+                  </Label>
+                  <Input
+                    id="gstNumber"
+                    placeholder="07AABCS1429B1ZP"
+                    className="font-mono uppercase"
+                    {...register("gstNumber")}
+                  />
+                  {errors.gstNumber && (
+                    <p className="text-xs text-destructive">{errors.gstNumber.message}</p>
+                  )}
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="upiId">UPI ID <span className="text-destructive">*</span></Label>
-                  <Input id="upiId" placeholder="ssjewellers@upi" {...register("upiId")} />
-                  {errors.upiId && <p className="text-xs text-destructive">{errors.upiId.message}</p>}
+                  <Label htmlFor="upiId">
+                    UPI ID <span className="text-destructive">*</span>
+                  </Label>
+                  <Input
+                    id="upiId"
+                    placeholder="ssjewellers@upi"
+                    {...register("upiId")}
+                  />
+                  {errors.upiId && (
+                    <p className="text-xs text-destructive">{errors.upiId.message}</p>
+                  )}
                 </div>
               </div>
 
@@ -166,11 +278,20 @@ export default function Profile() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <Label htmlFor="phone">Phone (optional)</Label>
-                  <Input id="phone" placeholder="+91 98765 43210" {...register("phone")} />
+                  <Input
+                    id="phone"
+                    placeholder="+91 98765 43210"
+                    {...register("phone")}
+                  />
                 </div>
                 <div className="space-y-1.5">
                   <Label htmlFor="email">Email (optional)</Label>
-                  <Input id="email" type="email" placeholder="info@ssjewellers.com" {...register("email")} />
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="info@ssjewellers.com"
+                    {...register("email")}
+                  />
                 </div>
               </div>
 

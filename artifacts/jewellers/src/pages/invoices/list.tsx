@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "wouter";
 import {
   listInvoices,
@@ -22,11 +22,13 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { formatIndianCurrency, formatDate } from "@/lib/format";
-import { PlusCircle, Search, Trash2, Eye, FileText } from "lucide-react";
+import { PlusCircle, Search, Trash2, Eye, FileText, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 export default function InvoicesList() {
   const [search, setSearch] = useState("");
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -49,15 +51,26 @@ export default function InvoicesList() {
     },
   });
 
-  const filtered = (invoices ?? []).filter(
-    (inv) =>
+  const hasDateFilter = fromDate || toDate;
+
+  const filtered = (invoices ?? []).filter((inv) => {
+    const matchesSearch =
       inv.customerName.toLowerCase().includes(search.toLowerCase()) ||
-      inv.invoiceNumber.toLowerCase().includes(search.toLowerCase()),
-  );
+      inv.invoiceNumber.toLowerCase().includes(search.toLowerCase());
+    const matchesFrom = !fromDate || inv.invoiceDate >= fromDate;
+    const matchesTo = !toDate || inv.invoiceDate <= toDate;
+    return matchesSearch && matchesFrom && matchesTo;
+  });
+
+  const clearFilters = () => {
+    setSearch("");
+    setFromDate("");
+    setToDate("");
+  };
 
   return (
     <Layout>
-      <div className="space-y-6">
+      <div className="space-y-5">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-foreground">Invoices</h1>
@@ -71,19 +84,57 @@ export default function InvoicesList() {
           </Link>
         </div>
 
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search by customer name or invoice number…"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-9"
-          />
+        {/* Search + date filter row */}
+        <div className="flex flex-col sm:flex-row gap-2">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search by customer name or invoice number…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-9"
+            />
+          </div>
+          <div className="flex gap-2 items-center">
+            <div className="flex items-center gap-1.5 text-sm text-muted-foreground whitespace-nowrap">
+              <span className="hidden sm:inline">From</span>
+              <Input
+                type="date"
+                value={fromDate}
+                onChange={(e) => setFromDate(e.target.value)}
+                className="w-36 text-sm"
+                title="From date"
+              />
+            </div>
+            <div className="flex items-center gap-1.5 text-sm text-muted-foreground whitespace-nowrap">
+              <span className="hidden sm:inline">To</span>
+              <Input
+                type="date"
+                value={toDate}
+                onChange={(e) => setToDate(e.target.value)}
+                className="w-36 text-sm"
+                title="To date"
+              />
+            </div>
+            {(search || hasDateFilter) && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-9 w-9 text-muted-foreground shrink-0"
+                onClick={clearFilters}
+                title="Clear filters"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
         </div>
 
         {isLoading ? (
           <div className="space-y-3">
-            {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-16 w-full" />)}
+            {[...Array(5)].map((_, i) => (
+              <Skeleton key={i} className="h-16 w-full" />
+            ))}
           </div>
         ) : filtered.length === 0 ? (
           <div className="text-center py-16 space-y-4">
@@ -92,15 +143,15 @@ export default function InvoicesList() {
             </div>
             <div>
               <p className="font-medium text-foreground">
-                {search ? "No invoices found" : "No invoices yet"}
+                {search || hasDateFilter ? "No invoices match your filters" : "No invoices yet"}
               </p>
               <p className="text-sm text-muted-foreground mt-1">
-                {search
-                  ? "Try a different search term"
+                {search || hasDateFilter
+                  ? "Try adjusting your search or date range"
                   : "Create your first GST invoice to get started"}
               </p>
             </div>
-            {!search && (
+            {!search && !hasDateFilter && (
               <Link href="/invoices/new">
                 <Button variant="outline">
                   <PlusCircle className="h-4 w-4 mr-2" />
@@ -108,24 +159,42 @@ export default function InvoicesList() {
                 </Button>
               </Link>
             )}
+            {(search || hasDateFilter) && (
+              <Button variant="outline" onClick={clearFilters}>
+                <X className="h-4 w-4 mr-2" />
+                Clear Filters
+              </Button>
+            )}
           </div>
         ) : (
           <div className="border rounded-lg overflow-hidden">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b bg-muted/50">
-                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Invoice #</th>
-                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Customer</th>
-                  <th className="text-left px-4 py-3 font-medium text-muted-foreground hidden md:table-cell">Date</th>
-                  <th className="text-right px-4 py-3 font-medium text-muted-foreground">Amount</th>
-                  <th className="text-right px-4 py-3 font-medium text-muted-foreground">Actions</th>
+                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">
+                    Invoice #
+                  </th>
+                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">
+                    Customer
+                  </th>
+                  <th className="text-left px-4 py-3 font-medium text-muted-foreground hidden md:table-cell">
+                    Date
+                  </th>
+                  <th className="text-right px-4 py-3 font-medium text-muted-foreground">
+                    Amount
+                  </th>
+                  <th className="text-right px-4 py-3 font-medium text-muted-foreground">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y">
                 {filtered.map((inv) => (
                   <tr key={inv.id} className="hover:bg-accent/40 transition-colors">
                     <td className="px-4 py-3">
-                      <Badge variant="outline" className="font-mono text-xs">{inv.invoiceNumber}</Badge>
+                      <Badge variant="outline" className="font-mono text-xs">
+                        {inv.invoiceNumber}
+                      </Badge>
                     </td>
                     <td className="px-4 py-3">
                       <p className="font-medium">{inv.customerName}</p>

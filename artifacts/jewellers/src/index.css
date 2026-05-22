@@ -224,6 +224,11 @@
   body {
     @apply font-sans antialiased bg-background text-foreground;
   }
+
+  /* Serif headings for a premium, jewellery-brand feel */
+  h1 {
+    font-family: var(--app-font-serif);
+  }
 }
 
 /**
